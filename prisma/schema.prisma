@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  name             String
+  email            String   @unique
+  passwordHash     String
+  bio              String?
+  profileImage     String?
+  socialLinks      Json?
+  createdAt        DateTime @default(now())
+
+  posts            Post[]
+  saves            Save[]
+  upvotes          Upvote[]
+  notifications    Notification[]
+  notificationPref NotificationSettings?
+}
+
+model Post {
+  id               String   @id @default(uuid())
+  authorId         String
+  title            String
+  content          String
+  status           PostStatus @default(DRAFT)
+  estimatedReadTime Int
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  author           User      @relation(fields: [authorId], references: [id])
+  stats            PostStats?
+  saves            Save[]
+  upvotes          Upvote[]
+}
+
+model PostStats {
+  postId String  @id
+  views  Int     @default(0)
+  upvotes Int    @default(0)
+
+  post   Post    @relation(fields: [postId], references: [id])
+}
+
+model Save {
+  userId String
+  postId String
+  savedAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  post   Post @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId])
+}
+
+model Upvote {
+  userId    String
+  postId    String
+  upvotedAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  post   Post @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model NotificationSettings {
+  userId         String  @id
+  newPostNotify  Boolean @default(true)
+  weeklyDigest   Boolean @default(true)
+
+  user           User    @relation(fields: [userId], references: [id])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
