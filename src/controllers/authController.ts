@@ -115,3 +115,14 @@ export const login = asyncWrapper(  async(req: Request, res: Response) => {
     return APIResponse.created(res, 'user created successfully', { accessToken, refreshToken})
 
 })
+
+export const updatePassword = asyncWrapper( async(req: Request, res: Response) => {
+    const { password } = req.body
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await prisma.user.update({
+        where: { id: req.user?.userId },
+        data: { password: hashedPassword }
+    })
+})

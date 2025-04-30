@@ -5,13 +5,13 @@ import APIError from "./apiError";
 export const generateAccessToken = (payload: {}) => {
 try {
         if(!payload){
-            throw error('payload missing for token generation')
+            throw APIError.internal('payload missing for token generation')
         }
     
         const secret = process.env.ACCESS_TOKEN_SECRET;
     
         if(!secret){
-            throw error('ENV missing for token generation')
+            throw APIError.internal('ENV missing for token generation')
         }
     
         const token = jwt.sign(payload, secret, { expiresIn: '5d'})
@@ -25,13 +25,13 @@ try {
 export const generateRefershToken =  (payload: {}) => {
 try {
         if(!payload){
-            throw error('payload missing for token generation')
+            throw APIError.internal('payload missing for token generation')
         }
     
         const secret = process.env.ACCESS_TOKEN_SECRET;
     
         if(!secret){
-            throw error('ENV missing for token generation')
+            throw APIError.internal('ENV missing for token generation')
         }
     
         const token = jwt.sign(payload, secret, { expiresIn: '15d'})
@@ -47,7 +47,7 @@ try {
         const secret = process.env.ACCESS_TOKEN_SECRET;
     
         if(!secret){
-            throw error('ENV missing for token generation')
+            throw APIError.internal('ENV missing for token generation')
         }
         const user = jwt.verify(token, secret)
         return user
